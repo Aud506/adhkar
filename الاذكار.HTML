@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الأذكار</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: center;
+            color: #333;
+        }
+        header {
+            background-color: #2d89ef;
+            color: white;
+            padding: 1.5rem;
+            font-size: 2rem;
+            border-bottom: 3px solid #1a5fb4;
+        }
+        main {
+            padding: 1.5rem;
+        }
+        .section {
+            margin: 1.5rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+        button {
+            background-color: #2d89ef;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1a5fb4;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .counter {
+            margin-top: 0.75rem;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+        .progress-bar span {
+            display: block;
+            height: 20px;
+            background-color: #2d89ef;
+        }
+        .adhkar-item p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            white-space: normal;
+            margin-bottom: 1rem;
+        }
+        .adhkar-item {
+            margin-bottom: 1.5rem;
+        }
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        body.dark-mode header {
+            background-color: #1a1a1a;
+            border-bottom: 3px solid #333;
+        }
+        body.dark-mode .section {
+            background-color: #1f1f1f;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+        }
+        body.dark-mode button {
+            background-color: #333;
+        }
+        body.dark-mode button:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <header>حاسبة الأذكار</header>
+    <main>
+        <div class="section">
+            <h3>اختر الأذكار</h3>
+            <button onclick="loadAdhkar('morning')">أذكار الصباح</button>
+            <button onclick="loadAdhkar('evening')">أذكار المساء</button>
+        </div>
+        <div id="adhkar-container" class="section" style="display: none;">
+            <div class="progress-bar">
+                <span id="progress" style="width: 0%;"></span>
+            </div>
+            <div id="adhkar-list"></div>
+            <button onclick="resetCounters()">إعادة التعيين</button>
+        </div>
+    </main>
+
+    <script>
+        const adhkar = {
+            morning: [
+                { text: 'اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ، لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ، لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ، مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلاَ يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلاَّ بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ، وَلاَ يَؤُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ.', count: 1 },
+                { text: 'قُلْ هُوَ اللَّهُ أَحَدٌ، اللَّهُ الصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ.', count: 3 },
+                { text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ.', count: 3 },
+                { text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ، مَلِكِ النَّاسِ، إِلَٰهِ النَّاسِ، مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ، الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ، مِنَ الْجِنَّةِ وَالنَّاسِ.', count: 3 },
+                { text: 'أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، ربِّ أسألك خير ما في هذا اليوم وخير ما بعده، وأعوذ بك من شر ما في هذا اليوم وشر ما بعده، ربِّ أعوذ بك من الكسل وسوء الكبر، ربِّ أعوذ بك من عذاب في النار وعذاب في القبر.', count: 1 },
+                { text: 'اللهم بك أصبحنا وبك أمسينا، وبك نحيا وبك نموت وإليك النشور.', count: 1 },
+                { text: 'سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته.', count: 3 },
+                { text: 'اللهم إني أسألك خير هذا اليوم، فتحه ونصره ونوره وبركته وهداه، وأعوذ بك من شر ما فيه وشر ما بعده.', count: 1 },
+                { text: 'اللهم إني أعوذ بك من الكفر والفقر، وأعوذ بك من عذاب القبر، لا إله إلا أنت.', count: 1 }
+            ],
+            evening: [
+                { text: 'اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ، لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ، لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ، مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلاَ يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلاَّ بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ، وَلاَ يَؤُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ.', count: 1 },
+                { text: 'قُلْ هُوَ اللَّهُ أَحَدٌ، اللَّهُ الصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ.', count: 3 },
+                { text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ.', count: 3 },
+                { text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ، مَلِكِ النَّاسِ، إِلَٰهِ النَّاسِ، مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ، الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ، مِنَ الْجِنَّةِ وَالنَّاسِ.', count: 3 },
+                { text: 'أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، ربِّ أسألك خير ما في هذه الليلة وخير ما بعدها، وأعوذ بك من شر ما في هذه الليلة وشر ما بعدها، ربِّ أعوذ بك من الكسل وسوء الكبر، ربِّ أعوذ بك من عذاب في النار وعذاب في القبر.', count: 1 },
+                { text: 'اللهم بك أمسينا وبك أصبحنا، وبك نحيا وبك نموت وإليك المصير.', count: 1 },
+                { text: 'سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته.', count: 3 },
+                { text: 'اللهم إني أسألك خير هذه الليلة، فتحها ونصرها ونورها وبركتها وهداه، وأعوذ بك من شر ما فيها وشر ما بعدها.', count: 1 },
+                { text: 'اللهم إني أعوذ بك من الكسل والهرم، وأعوذ بك من عذاب في النار وعذاب في القبر.', count: 1 }
+            ]
+        };
+
+        function loadAdhkar(type) {
+            const adhkarContainer = document.getElementById('adhkar-container');
+            const adhkarList = document.getElementById('adhkar-list');
+            adhkarList.innerHTML = '';
+
+            let totalAdhkar = 0;
+            adhkar[type].forEach((item, index) => {
+                totalAdhkar += item.count;
+                const adhkarDiv = document.createElement('div');
+                adhkarDiv.classList.add('adhkar-item');
+
+                const adhkarText = document.createElement('p');
+                adhkarText.textContent = item.text;
+
+                const counterDiv = document.createElement('div');
+                counterDiv.classList.add('counter');
+
+                const countDisplay = document.createElement('span');
+                countDisplay.textContent = `0/${item.count}`;
+                countDisplay.id = `count-${index}`;
+
+                const countButton = document.createElement('button');
+                countButton.textContent = 'زيادة';
+                countButton.onclick = () => incrementCounter(index, item.count, totalAdhkar);
+
+                counterDiv.appendChild(countDisplay);
+                counterDiv.appendChild(countButton);
+
+                adhkarDiv.appendChild(adhkarText);
+                adhkarDiv.appendChild(counterDiv);
+
+                adhkarList.appendChild(adhkarDiv);
+            });
+
+            adhkarContainer.style.display = 'block';
+            updateProgress(0, totalAdhkar);
+        }
+
+        function incrementCounter(index, maxCount, totalAdhkar) {
+            const countDisplay = document.getElementById(`count-${index}`);
+            let [currentCount] = countDisplay.textContent.split('/').map(Number);
+            if (currentCount < maxCount) {
+                currentCount++;
+                countDisplay.textContent = `${currentCount}/${maxCount}`;
+            }
+            updateProgress(getCompletedCount(), totalAdhkar);
+        }
+
+        function getCompletedCount() {
+            const counts = document.querySelectorAll('[id^="count-"]');
+            return Array.from(counts).reduce((sum, el) => {
+                const [current] = el.textContent.split('/').map(Number);
+                return sum + current;
+            }, 0);
+        }
+
+        function updateProgress(completed, total) {
+            const progress = document.getElementById('progress');
+            const percentage = (completed / total) * 100;
+            progress.style.width = `${percentage}%`;
+        }
+
+        function resetCounters() {
+            const counts = document.querySelectorAll('[id^="count-"]');
+            counts.forEach((el) => {
+                const [, maxCount] = el.textContent.split('/').map(Number);
+                el.textContent = `0/${maxCount}`;
+            });
+            updateProgress(0, counts.length);
+        }
+    </script>
+</body>
+</html>
